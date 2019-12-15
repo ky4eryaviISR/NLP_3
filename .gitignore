@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.idea/
+DepTreeViewer_17_06_10.jar
+data/
