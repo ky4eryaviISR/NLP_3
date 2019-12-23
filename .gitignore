@@ -130,3 +130,5 @@ dmypy.json
 .idea/
 DepTreeViewer_17_06_10.jar
 data/
+temp/
+sample.trees.lemmatized/
