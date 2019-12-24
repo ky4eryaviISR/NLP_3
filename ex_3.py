@@ -2,11 +2,13 @@ from sys import argv
 import numpy as np
 from collections import defaultdict, Counter, OrderedDict
 
+LEMMA_MIN = 10
 
 def PMI_smooth(word, context):
     P_xy = word_att_counter[word][context]/total_word_att
     P_x = sum(word_att_counter[word].values())/total_word_att
     P_y = att_cnt[context]/total_word_att
+    print(P_xy/(P_x*P_y))
     return np.log(P_xy/(P_x*P_y))
 
 
@@ -20,7 +22,8 @@ def load_txt():
             sentences.append(sen)
             sen = []
             continue
-        if line.split('\t')[7] in ['p', 'adpmod']:
+        if line.split('\t')[7] in ['p', 'adpmod', 'det', 'cc', 'adpcomp', 'aux', 'auxpass','nsubj','mark','adp','neg']\
+                or line.split('\t')[2] in ['.', 'a', ')', '(']:
             continue
         line_dict = {
             'id': line.split('\t')[0],
@@ -56,7 +59,7 @@ if __name__ == '__main__':
     word_att_counter, att_cnt = get_word_counter()
 
     # delete lemmas which occurrences less than 75
-    word_set = [lemma for lemma, count in lemma_count.items() if count > 75]
+    word_set = [lemma for lemma, count in lemma_count.items() if count > LEMMA_MIN]
     # get 100 common attributes/context
     att_cnt_set = {k: v for k, v in sorted(att_cnt.items(),
                                            key=lambda item: item[1],
@@ -68,12 +71,19 @@ if __name__ == '__main__':
     att_2_index = {k: index for index, k in enumerate(att_cnt_set)}
     index_2_att = {v: k for k, v in att_2_index.items()}
 
-    pmi_matrix = np.zeros((len(word_set), len(att_cnt_set)))
-    total_lemma = sum(lemma_count.values())
+    pmi_matrix = {w: {} for w in word_set}
     total_word_att = sum([c for cont in word_att_counter.values() for c in cont.values()])
     for w in word_set:
         for att in att_cnt_set:
-            PMI_smooth(w, att)
+            if att not in word_att_counter[w]:
+                continue
+            pmi = PMI_smooth(w, att)
+            if pmi <= 0:
+                continue
+            # create sparse matrix
+            att_id = att_2_index[att]
+            pmi_matrix[w][att_id] = pmi
+
 
 
 
