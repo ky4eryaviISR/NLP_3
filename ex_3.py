@@ -1,14 +1,16 @@
 from sys import argv
 import numpy as np
 from collections import defaultdict, Counter, OrderedDict
+import math
 
 LEMMA_MIN = 10
+target_words = ['car', 'bus', 'hospital', 'hotel', 'gun', 'bomb', 'horse', 'fox', 'table', 'bowl' ,'guitar', 'piano']
 
 def PMI_smooth(word, context):
     P_xy = word_att_counter[word][context]/total_word_att
     P_x = sum(word_att_counter[word].values())/total_word_att
     P_y = att_cnt[context]/total_word_att
-    print(P_xy/(P_x*P_y))
+    #print(P_xy/(P_x*P_y))
     return np.log(P_xy/(P_x*P_y))
 
 
@@ -21,9 +23,6 @@ def load_txt():
         if line == '':
             sentences.append(sen)
             sen = []
-            continue
-        if line.split('\t')[7] in ['p', 'adpmod', 'det', 'cc', 'adpcomp', 'aux', 'auxpass','nsubj','mark','adp','neg']\
-                or line.split('\t')[2] in ['.', 'a', ')', '(']:
             continue
         line_dict = {
             'id': line.split('\t')[0],
@@ -60,20 +59,19 @@ if __name__ == '__main__':
 
     # delete lemmas which occurrences less than 75
     word_set = [lemma for lemma, count in lemma_count.items() if count > LEMMA_MIN]
-    # get 100 common attributes/context
-    att_cnt_set = {k: v for k, v in sorted(att_cnt.items(),
-                                           key=lambda item: item[1],
-                                           reverse=True)[0:100]}
     # index for each lemma
     lemma_2_index = {k: index for index, k in enumerate(word_set)}
     index_2_lemma = {v: k for k, v in lemma_2_index.items()}
     # index for each attribute/context
-    att_2_index = {k: index for index, k in enumerate(att_cnt_set)}
+    att_2_index = {k: index for index, k in enumerate(att_cnt.keys())}
     index_2_att = {v: k for k, v in att_2_index.items()}
 
     pmi_matrix = {w: {} for w in word_set}
     total_word_att = sum([c for cont in word_att_counter.values() for c in cont.values()])
     for w in word_set:
+        att_cnt_set = [k for k, v in sorted(word_att_counter[w].items(),
+                                 key=lambda item: item[1],
+                                 reverse=True)[0:100]]
         for att in att_cnt_set:
             if att not in word_att_counter[w]:
                 continue
@@ -84,6 +82,22 @@ if __name__ == '__main__':
             att_id = att_2_index[att]
             pmi_matrix[w][att_id] = pmi
 
+
+    word_norm = {}
+    for word, context_dic in word_att_counter.items():
+        norm = 0.0
+        for context, count in context_dic.items():
+            norm += context_dic[context]**2
+        word_norm[word] = math.sqrt(norm)
+
+    for word in word_set:
+        words = np.zeros(len(pmi_matrix))
+        for att, pmi1 in pmi_matrix[word].items():
+            for word2 in att_cnt_set:
+                for att2, pmi2 in pmi_matrix[word2].items():
+                    words[lemma_2_index[word2]] += pmi1 * pmi2
+            for i in range(len(words)):
+                words[i] = words[i] / word_norm[word] * word_norm[word2]
 
 
 
