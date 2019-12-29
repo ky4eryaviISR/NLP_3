@@ -1,11 +1,14 @@
+from datetime import datetime
 from sys import argv
 import numpy as np
 from collections import defaultdict, Counter, OrderedDict
 import math
 
-LEMMA_MIN = 10
-target_words = ['car', 'bus', 'hospital', 'hotel', 'gun', 'bomb', 'horse', 'fox', 'table', 'bowl' ,'guitar', 'piano']
-
+LEMMA_MIN = 5
+MAX_COMMON_ATT = 100
+CO_THRESHOLD = 1
+target_words = ['car', 'bus', 'hospital', 'hotel', 'gun', 'bomb', 'horse', 'fox', 'table', 'bowl' , 'guitar', 'piano']
+FUNCT_WORDS = [',', '.', 'the', 'a', '(', ')', 'this', 'those']
 def PMI_smooth(word, context):
     P_xy = word_att_counter[word][context]/total_word_att
     P_x = sum(word_att_counter[word].values())/total_word_att
@@ -24,80 +27,98 @@ def load_txt():
             sentences.append(sen)
             sen = []
             continue
-        line_dict = {
-            'id': line.split('\t')[0],
-            'lemma': line.split('\t')[2],
-            'tag': line.split('\t')[3],
-            'feat': line.split('\t')[5]
-        }
-        sen.append(line_dict)
-        lemma = line_dict['lemma']
+        # if line.split('\t')[2] in FUNCT_WORDS:
+        #     continue
+        lemma = line.split('\t')[2]
+        sen.append(lemma)
         lemma_count[lemma] = 1 if lemma not in lemma_count \
             else lemma_count[lemma] + 1
     return sentences, lemma_count
 
 
-def get_word_counter():
+def get_word_counter(word_count):
     counts = defaultdict(Counter)
     context_counter = {}
     for s in sentences:
-        permutation = [(word['lemma'], con['lemma']) for word in s for con in s]
-        for word, context in permutation:
-            context_counts_for_word = counts[word]
-            context_counts_for_word[context] += 1
-            context_counter[context] = 1 if context not in context_counter \
-                else context_counter[context]+1
+        for word in s:
+            if word_count[word] >= LEMMA_MIN:
+                index = s.index(word)
+                for i, context in enumerate(s):
+                    if i == index:
+                        continue
+                    context_counts_for_word = counts[word]
+                    context_counts_for_word[context] += 1
+                    context_counter[context] = 1 if context not in context_counter \
+                        else context_counter[context]+1
     return counts, context_counter
+
+
+def get_index_4_lemma(lemma_cnt):
+    w_set = [lemma for lemma, cnt in lemma_cnt.items()]
+    # index for each lemma
+    l_2_i = {k: index for index, k in enumerate(w_set)}
+    i_2_l = {v: k for k, v in l_2_i.items()}
+    # delete lemmas which occurrences less than LEMMA_MIN
+    w_set = [lemma for lemma, cnt in lemma_cnt.items() if cnt >= LEMMA_MIN]
+    return l_2_i, i_2_l, w_set
+
+
+def get_att_4_index(att_cnt):
+    # index for each attribute/context
+    a_2_i = {k: index for index, k in enumerate(att_cnt.keys())}
+    i_2_a = {v: k for k, v in a_2_i.items()}
+    return a_2_i, i_2_a
 
 
 if __name__ == '__main__':
     vocabulary = argv[1]
     # loading the sentences and count for each lemma
+    print(f"{datetime.now()}:Load text")
     sentences, lemma_count = load_txt()
     # get count vector for each word and attr
-    word_att_counter, att_cnt = get_word_counter()
+    print(f"{datetime.now()}:Get word counter")
+    word_att_counter, att_cnt = get_word_counter(lemma_count)
 
-    # delete lemmas which occurrences less than 75
-    word_set = [lemma for lemma, count in lemma_count.items() if count > LEMMA_MIN]
-    # index for each lemma
-    lemma_2_index = {k: index for index, k in enumerate(word_set)}
-    index_2_lemma = {v: k for k, v in lemma_2_index.items()}
-    # index for each attribute/context
-    att_2_index = {k: index for index, k in enumerate(att_cnt.keys())}
-    index_2_att = {v: k for k, v in att_2_index.items()}
+    lemma_2_index, index_2_lemma, word_set = get_index_4_lemma(lemma_count)
 
     pmi_matrix = {w: {} for w in word_set}
-    total_word_att = sum([c for cont in word_att_counter.values() for c in cont.values()])
+    total_word_att = 0
+    for word in word_att_counter.keys():
+        total_word_att += sum(word_att_counter[word].values())
+    print(f"{datetime.now()}:Start calculating PMI")
+    word_att_set = {}
     for w in word_set:
-        att_cnt_set = [k for k, v in sorted(word_att_counter[w].items(),
+        word_att_set[w] = [k for k, v in sorted(word_att_counter[w].items(),
                                  key=lambda item: item[1],
-                                 reverse=True)[0:100]]
-        for att in att_cnt_set:
+                                 reverse=True)][0:100]
+        for att in word_att_set[w]:
             if att not in word_att_counter[w]:
                 continue
             pmi = PMI_smooth(w, att)
             if pmi <= 0:
                 continue
             # create sparse matrix
-            att_id = att_2_index[att]
+            att_id = lemma_2_index[att]
             pmi_matrix[w][att_id] = pmi
 
-
     word_norm = {}
+    print(f"{datetime.now()}:Start calculating norm")
     for word, context_dic in word_att_counter.items():
         norm = 0.0
         for context, count in context_dic.items():
             norm += context_dic[context]**2
         word_norm[word] = math.sqrt(norm)
-
-    for word in word_set:
-        words = np.zeros(len(pmi_matrix))
+    print(f"{datetime.now()}:Start calculating similarity")
+    for word in ['dog']:
+        words = np.zeros(len(lemma_2_index))
         for att, pmi1 in pmi_matrix[word].items():
-            for word2 in att_cnt_set:
-                for att2, pmi2 in pmi_matrix[word2].items():
-                    words[lemma_2_index[word2]] += pmi1 * pmi2
-            for i in range(len(words)):
-                words[i] = words[i] / word_norm[word] * word_norm[word2]
+            for word2 in word_set:
+                if att in pmi_matrix[word2]:
+                    words[lemma_2_index[word2]] += pmi1 * pmi_matrix[word2][att]
+
+        for i, word2 in enumerate(word_set):
+            words[i] = words[i] / (word_norm[word] * word_norm[word2])
+        print('x')
 
 
 
