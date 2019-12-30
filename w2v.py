@@ -21,7 +21,6 @@ i = 0
 with open(words_file, 'r', encoding='utf-8') as file:
     for line in file:
         i += 1
-        if i == 5000 : break
         line = line.split()
         word, vec = line[0], np.array(line[1:], dtype=float)
         word_to_id[word] = i-1
@@ -50,7 +49,6 @@ i = 0
 with open(context_file, 'r', encoding='utf-8') as file:
     for line in file:
         i += 1
-        if i == 5000: break
         line = line.split()
         con, vec = line[0], np.array(line[1:], dtype=float)
         context_to_id[con] = i
@@ -66,7 +64,7 @@ with open(context_file, 'r', encoding='utf-8') as file:
 def k_sim(word, k=20):
     word_vec = W_word[word_to_id[word]]
     similarities = W_word.dot(word_vec)
-    sims = similarities.argsort()[-1:-k:-1]
+    sims = similarities.argsort()[-1:-k-1:-1]
     sims = np.array(sims)
     similar_words = np.array(words_vocabulary)[sims]
     return similar_words
@@ -75,7 +73,7 @@ def k_sim(word, k=20):
 def k_context(word, k=10):
     word_vec = target_vecs[word]
     similarities = W_ctx.dot(word_vec)
-    sims = similarities.argsort()[-1:-k:-1]
+    sims = similarities.argsort()[-1:-k-1:-1]
     sims = np.array(sims)
     similar_words = np.array(contexts)[sims]
     return similar_words
@@ -93,21 +91,17 @@ if __name__ == '__main__':
         similar_contexts = k_context(word)
         print(similar_contexts)
         print()
+        with open(sys.argv[3] + '_2-nd_similarity.csv', 'a+') as file1:
+            file1.write('"' + word + ': ' + 'similar words ' + sys.argv[3] + '"' + '\n')
+            for sim_word in similar_words:
+                file1.write('"' + sim_word + '"' + '\n')
+            file1.write('\n')
+        with open(sys.argv[3] + '_1-st_similarity.csv', 'a+') as file2:
+            file2.write('"' + word + ': ' + 'similar contexts ' + sys.argv[3] + '"' + '\n')
+            for sim_ctx in similar_contexts:
+                file2.write('"' + str(sim_ctx) + '"' + '\n')
+            file2.write('\n')
 
 end = time.time() - start
 
-print ("time", end)
-
-"""
-    with open(argv[3] + '_2-nd_similarity.csv', 'a+') as file1:
-        file1.write('"' + word + ': ' + 'similar words ' + argv[3] + '"' + '\n')
-        for sim_word in similar_words:
-            file1.write('"' + sim_word + '"' + '\n')
-        file1.write('\n')
-    with open(argv[3] + '_1-st_similarity.csv', 'a+') as file2:
-        file2.write('"' + word + ': ' + 'similar contexts ' + argv[3] + '"' + '\n')
-        for sim_ctx in similar_contexts:
-            file2.write('"' + str(sim_ctx) + '"' + '\n')
-        file2.write('\n')
-
-"""
+print("time", end)
