@@ -91,10 +91,12 @@ if __name__ == '__main__':
             file1.write('similar contexts for:' + word + '\n')
             for w in sim_word:
                 file1.write(w + '\n')
+            file1.write('\n')
         with open(out_file + '_1-st_similarity.csv', 'w') as file2:
             file2.write('similar contexts for:' + word + '\n')
             for context in sim_context:
                 file2.write(str(context) + '\n')
+            file2.write('\n')
 
 end = time.time() - start
 

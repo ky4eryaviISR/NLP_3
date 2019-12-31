@@ -5,25 +5,27 @@ from datetime import datetime
 
 import numpy as np
 
-WORDS = ["car", "bus", "hospital", "hotel", "gun", "bomb", "fox", "table", "bowl", "guitar", "piano"]
+WORDS = ['car', 'bus', 'hospital', 'hotel', 'gun', 'bomb', 'horse', 'fox', 'table', 'bowl', 'guitar', 'piano']
 
-CONTENT_CLASSES = {'JJ', 'JJR', 'JJS', 'NN', 'NNS', 'NNP', 'NNPS', 'RB', 'RBR', 'RBS', 'VB', 'VBD', 'VBG', 'VBN',
-                   'VBP', 'VBZ', 'WRB'}
-LEMMA_MIN = 10
+LEMMA_MIN = 100
+CONTENT_POS = {'JJ', 'JJR', 'JJS', 'NN', 'NNS', 'NNP', 'NNPS', 'RB',
+               'RBR', 'RBS', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'WRB'}
+FUNC_WORDS = {'be', 'is', 'am', 'are', 'have', 'got', 'do',
+              'not', 'he', 'they', 'anybody', 'it', 'one',
+              'when', 'while', ']'}
 
 
 class Parser(object):
 
-    def __init__(self, path, out_file):
-        self.out_file = out_file
-        self.word_att = {}
+    def __init__(self, path):
+        self.most_sim = {}
         self.context_count = {}
+        self.word_att = {}
         self.lemma_cnt = None
-        self.word_set = self.word_index = self.index_word = None
-        print(f"{datetime.now()}:Build Dictionary")
-        self.get_word_index_dict(path)
+        self.sen_cnt = 0
         print(f"{datetime.now()}:File Parsing")
         self.sentences = self.load_txt(path)
+        self.contexts = self.create_contexts(self.sentences)
 
     def PMI_smooth(self, word, context, total):
         P_xy = self.word_att[word][context] / total
@@ -31,33 +33,17 @@ class Parser(object):
         P_y = self.context_count[context] / total
         return np.log(P_xy / (P_x * P_y))
 
+    def create_contexts(self, sentences):
+        c = []
+        for i, s in enumerate(sentences):
+            c.append(self.get_context(s, sen_index=i))
+            if i % 100000 == 0:
+                print(f"{datetime.now()}: Pass 100,000 sentences")
+        return c
+
     @abstractmethod
     def get_context(self, s, sen_index=None):
         pass
-
-    def get_word_index_dict(self,vocabulary):
-        lemma_count = {}
-        with open(vocabulary, encoding='utf8') as f:
-            for line in f:
-                # if we get the end of the sentence add it to all sentences
-                if line == '\n':
-                    continue
-                lemma = line.split('\t')[2]
-                if line.split('\t')[4] in CONTENT_CLASSES:
-                    lemma_count[lemma] = 1 if lemma not in lemma_count \
-                        else lemma_count[lemma] + 1
-        self.lemma_cnt = lemma_count
-        self.word_set = [lemma for lemma, count in self.lemma_cnt.items() if count >= LEMMA_MIN]
-        with open('counts_words.txt','w') as f:
-            for l, cnt in {k: v for k, v in
-                           sorted(self.lemma_cnt.items(),
-                                  key=lambda item: item[1],
-                                  reverse=True)[0:50]}.items():
-                f.write(f"{l} {cnt}\n")
-
-        # index for each lemma
-        self.word_index = {k: index for index, k in enumerate(self.word_set)}
-        self.index_word = {v: k for k, v in self.word_index.items()}
 
     def calculate_pmi(self):
 
@@ -89,63 +75,76 @@ class Parser(object):
 
     def create_sparse_matrix(self):
         counts = defaultdict(Counter)
-        context_counter = {}
         print('Total sequences: ' + str(len(self.sentences)))
         for j, s in enumerate(self.sentences):
-            context_lst = self.get_context(s, j)
+            if j % 100000 == 0:
+                print(f"{datetime.now()}: Passed 100,000")
+            context_lst = self.contexts[j]
             for k, word in enumerate(s):
+                if self.lemma_cnt[word] < LEMMA_MIN:
+                    continue
                 for i, context in enumerate(context_lst[k]):
-                    if i == k and isinstance(self, SentenceParser):
-                        continue
-                    context_counts_for_word = counts[word]
-                    context_counts_for_word[context] += 1
-                    context_counter[context] = 1 if context not in context_counter \
-                        else context_counter[context] + 1
-        self.index_word = {v: k for k, v in self.word_index.items()}
+                    if self.context_count[context] > 100:
+                        if i == k and isinstance(self, SentenceParser):
+                            continue
+                        context_counts_for_word = counts[word]
+                        context_counts_for_word[context] += 1
+
         self.word_att = counts
-        self.context_count = context_counter
-        with open('counts_contexts_dep.txt', 'w') as f:
-            for c, cnt in {k: v for k, v in
-                           sorted(self.context_count,
-                                  key=lambda item: item[1],
-                                  reverse=True)[0:50]}.items():
-                f.write(f"{c} {cnt}\n")
+        if isinstance(self, ContextParser):
+            with open('counts_contexts_dep.txt', 'w') as f:
+                for c, cnt in {k: v for k, v in
+                               sorted(self.context_count.items(),
+                                      key=lambda item: item[1],
+                                      reverse=True)[0:50]}.items():
+                    f.write(f"{c} {cnt}\n")
+                with open('counts_words.txt', 'w') as f:
+                    for c, cnt in {k: v for k, v in
+                                   sorted(self.lemma_cnt.items(),
+                                          key=lambda item: item[1],
+                                          reverse=True)[0:50]}.items():
+                        f.write(f"{c} {cnt}\n")
 
     def get_similarities(self, word_att_pmi, norm):
+        word_set = [k for k,v in self.lemma_cnt.items() if v > LEMMA_MIN]
         result = {}
         for word in WORDS:
-            if word not in self.word_index:
-                continue
-            word = self.word_index[word]
-            for other in self.word_set:
-                other = self.word_index[other]
+            for other in word_set:
                 same_labels = set(word_att_pmi[word]).intersection(word_att_pmi[other])
                 mone = 0
                 for att in same_labels:
                      mone += word_att_pmi[word][att] * word_att_pmi[other][att]
-                result[other] = mone / (norm[word] * norm[other])
-            top_pmi = {self.index_word[k]: v for k, v in sorted(word_att_pmi[word].items(),
-                                                                key=lambda item: item[1], reverse=True)[0: 20]}
-            top_similarity = {self.index_word[k]: v for k, v in sorted(result.items(),
-                                                                       key=lambda item: item[1], reverse=True)[0: 20]}
+                if len(same_labels) > 0:
+                    result[other] = mone / (norm[word] * norm[other])
+                else:
+                    result[other] = 0
+            top_pmi = {k: v for k, v in sorted(word_att_pmi[word].items(),
+                                               key=lambda item: item[1], reverse=True)[0: 20]}
+            top_similarity = {k: v for k, v in sorted(result.items(),
+                                                      key=lambda item: item[1], reverse=True)[0: 20]}
             self.print_top(top_pmi, top_similarity, word)
+            self.most_sim[word] = list(top_similarity.keys())
 
     def print_top(self, pmi, sim, word):
         print('1-st order similarity')
-        print(self.index_word[word] + ": " + ' '.join(list(pmi.keys())))
+        print(word + ": " + ' '.join(list(pmi.keys())))
         print('2-nd order similarity')
-        print(self.index_word[word] + ": " + ' '.join(list(sim.keys())))
-        word = self.index_word[word]
-        with open(self.out_file + '_1-nd_similarity.csv', 'a+') as file1:
+        print(word + ": " + ' '.join(list(sim.keys())))
+        with open(self.get_class() + '_1-nd_similarity.csv', 'a+',encoding='utf-8') as file1:
             file1.write('similar contexts for:' + word + '\n')
             for w in pmi.keys():
                 file1.write(w + '\n')
-        with open(self.out_file + '_2-st_similarity.csv', 'a+') as file2:
+        with open(self.get_class() + '_2-st_similarity.csv', 'a+',encoding='utf-8') as file2:
             file2.write('similar contexts for:' + word + '\n')
             for context in sim.keys():
                 file2.write(str(context) + '\n')
 
+    @abstractmethod
+    def get_class(self):
+        pass
+
     def load_txt(self, vocabulary):
+        lemma_count = {}
         sentences = []
         sen = []
         with open(vocabulary, encoding='utf8') as f:
@@ -156,65 +155,76 @@ class Parser(object):
                     sen = []
                     continue
                 lemma = line.split('\t')[2]
-                if line.split('\t')[4] in CONTENT_CLASSES and lemma in self.word_set:
-                    sen.append(self.word_index[lemma])
+                if line.split('\t')[4] in CONTENT_POS and lemma not in FUNC_WORDS:
+                    sen.append(lemma)
+                    lemma_count[lemma] = 1 if lemma not in lemma_count \
+                        else lemma_count[lemma] + 1
+            self.lemma_cnt = lemma_count
         return sentences
 
 
 class SentenceParser(Parser):
     def get_context(self, s, sen_index=None):
-        return [s for _ in range(len(s))]
+        con = [s for _ in range(len(s))]
+        for row in con:
+            for w in row:
+                self.context_count[w] = 1 if w not in self.context_count \
+                    else self.context_count[w] + 1
+        return con
+
+    def get_class(self):
+        return "SentenceParser"
 
 
 class WindowParser(Parser):
     def get_context(self, s, sen_index=None):
-        return [s[i - 2:i] + s[i + 1:i + 3] for i in range(len(s))]
+        con = [s[i - 2:i] + s[i + 1:i + 3] for i in range(len(s))]
+        for row in con:
+            for w in row:
+                self.context_count[w] = 1 if w not in self.context_count \
+                    else self.context_count[w] + 1
+        return con
+
+    def get_class(self):
+        return "WindowParser"
 
 
 class ContextParser(Parser):
 
+    def get_class(self):
+        return "ContextParser"
+
     def get_context(self, s, sen_index=None):
         context_sen = self.con_sentences[sen_index]
-        max_index = max(self.word_index.values())+1
         context_dict = {k: [] for k in context_sen.keys()}
-        i = 0
         for id_loc, values in context_sen.items():
             word, head_loc, feats, prep = values
-            if head_loc == 0 or  word not in self.lemma_cnt or\
-                    self.lemma_cnt[word] < LEMMA_MIN or prep:
+            if head_loc == 0 or prep or head_loc not in context_sen:
                 continue
-            h_word, h_head_loc, h_feats, prep = context_sen[head_loc]
-            if self.lemma_cnt[h_word] < LEMMA_MIN:
+            h_word, h_head_loc, h_feats, h_prep = context_sen[head_loc]
+            if h_word not in self.lemma_cnt:
                 continue
-            context = (h_word+'_'+feats+'_up')
-            if context not in self.word_index:
-                self.word_index[context] = max_index
-                max_index += 1
-            context_dict[id_loc].append(self.word_index[context])
-
-            context2 = (word + '_' + feats + '_down')
-            if context2 not in self.word_index:
-                self.word_index[context2] = max_index
-                max_index += 1
-            context_dict[head_loc].append(self.word_index[context2])
-
-            if prep and h_head_loc != 0:
+            if not h_prep:
+                context = (h_word + '_' + feats + '_up')
+                self.add_context(context)
+                context_dict[id_loc].append(context)
+                context2 = (word + '_' + feats + '_down')
+                context_dict[head_loc].append(context2)
+                self.add_context(context2)
+            if h_prep and h_head_loc != 0 and h_head_loc in context_sen:
                 hh_word, hh_head_loc, hh_feats, prep = context_sen[h_head_loc]
-                context3 = (word+'_'+h_feats + '_' + h_word+'_down')
-                if context3 not in self.word_index:
-                    self.word_index[context3] = max_index
-                    max_index += 1
-                context_dict[h_head_loc].append(self.word_index[context3])
+                context3 = (word + '_' + h_feats + '_' + h_word+'_down')
+                self.add_context(context3)
+                context_dict[h_head_loc].append(context3)
                 context4 = (hh_word+'_'+h_feats+'_'+h_word+'_up')
-                if context4 not in self.word_index:
-                    self.word_index[context4] = max_index
-                    max_index += 1
-                context_dict[id_loc].append(self.word_index[context4])
-        # self.index_word = {v: k for k, v in self.word_index.items()}
-        # print({self.index_word[context_sen[k][0]]: [
-        #     [self.index_word[self.index_word[i][0]], self.index_word[i][1], self.index_word[i][2]] for i in v] for k, v
-        #  in context_dict.items()})
+                context_dict[id_loc].append(context4)
+                self.add_context(context4)
+
         return [v for k, v in context_dict.items() if k in self.con_sen_index[sen_index]]
+
+    def add_context(self,context):
+        self.context_count[context] = 1 if context not in self.context_count \
+            else self.context_count[context] + 1
 
     def load_txt(self, vocabulary):
         self.con_sentences = []
@@ -222,9 +232,11 @@ class ContextParser(Parser):
         sentences = []
         sen = []
         sen_index = []
-        self.con_sen_index = []
+        lemma_count = {}
+        self.con_sen_index = [None]*self.sen_cnt
+        i = 0
         with open(vocabulary, encoding='utf8') as f:
-            for line in f.readlines():
+            for line in f:
                 # if we get the end of the sentence add it to all sentences
                 if line == '\n':
                     sentences.append(sen)
@@ -233,11 +245,20 @@ class ContextParser(Parser):
                     context_sen = {}
                     sen_index =[]
                     sen = []
+                    i += 1
                     continue
                 ID, _, lemma, _, CLASS, _, HEAD, FEATS, _, _ = line.split('\t')
-                context_sen[int(ID)] = [lemma, int(HEAD), FEATS, CLASS == 'IN']
-                if CLASS in CONTENT_CLASSES and lemma in self.word_set:
-                    sen.append(self.word_index[lemma])
+                if CLASS in CONTENT_POS and lemma not in FUNC_WORDS:
+                    context_sen[int(ID)] = [lemma, int(HEAD), FEATS, False]
+                    sen.append(lemma)
                     sen_index.append(int(ID))
-
+                elif CLASS == 'IN':
+                    context_sen[int(ID)] = [lemma, int(HEAD), FEATS, True]
+                if CLASS in CONTENT_POS and lemma not in FUNC_WORDS:
+                    lemma_count[lemma] = 1 if lemma not in lemma_count \
+                        else lemma_count[lemma] + 1
+            self.lemma_cnt = lemma_count
+            print(f"{datetime.now()}: Start creating contexes")
             return sentences
+
+
