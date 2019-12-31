@@ -48,6 +48,13 @@ class Parser(object):
                         else lemma_count[lemma] + 1
         self.lemma_cnt = lemma_count
         self.word_set = [lemma for lemma, count in self.lemma_cnt.items() if count >= LEMMA_MIN]
+        with open('counts_words.txt','w') as f:
+            for l, cnt in {k: v for k, v in
+                           sorted(self.lemma_cnt.items(),
+                                  key=lambda item: item[1],
+                                  reverse=True)[0:50]}.items():
+                f.write(f"{l} {cnt}\n")
+
         # index for each lemma
         self.word_index = {k: index for index, k in enumerate(self.word_set)}
         self.index_word = {v: k for k, v in self.word_index.items()}
@@ -61,7 +68,7 @@ class Parser(object):
         for word in self.word_att.keys():
             att_vec = word_att_pmi[word] = {k: v for k, v in sorted(self.word_att[word].items(),
                                                                     key=lambda item: item[1],
-                                                                    reverse=True)[0:100]}
+                                                                    reverse=True)[0:50]}
             for att, count in list(att_vec.items()):
                 pmi = self.PMI_smooth(word, att, total_word_att)
                 if pmi > 0:
@@ -97,6 +104,12 @@ class Parser(object):
         self.index_word = {v: k for k, v in self.word_index.items()}
         self.word_att = counts
         self.context_count = context_counter
+        with open('counts_contexts_dep.txt', 'w') as f:
+            for c, cnt in {k: v for k, v in
+                           sorted(self.context_count,
+                                  key=lambda item: item[1],
+                                  reverse=True)[0:50]}.items():
+                f.write(f"{c} {cnt}\n")
 
     def get_similarities(self, word_att_pmi, norm):
         result = {}
@@ -167,11 +180,12 @@ class ContextParser(Parser):
         i = 0
         for id_loc, values in context_sen.items():
             word, head_loc, feats, prep = values
-            if head_loc == 0:
-                continue
-            if prep:
+            if head_loc == 0 or  word not in self.lemma_cnt or\
+                    self.lemma_cnt[word] < LEMMA_MIN or prep:
                 continue
             h_word, h_head_loc, h_feats, prep = context_sen[head_loc]
+            if self.lemma_cnt[h_word] < LEMMA_MIN:
+                continue
             context = (h_word+'_'+feats+'_up')
             if context not in self.word_index:
                 self.word_index[context] = max_index
@@ -210,7 +224,7 @@ class ContextParser(Parser):
         sen_index = []
         self.con_sen_index = []
         with open(vocabulary, encoding='utf8') as f:
-            for line in f:
+            for line in f.readlines():
                 # if we get the end of the sentence add it to all sentences
                 if line == '\n':
                     sentences.append(sen)
