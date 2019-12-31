@@ -9,14 +9,16 @@ WORDS = ["car", "bus", "hospital", "hotel", "gun", "bomb", "fox", "table", "bowl
 
 CONTENT_CLASSES = {'JJ', 'JJR', 'JJS', 'NN', 'NNS', 'NNP', 'NNPS', 'RB', 'RBR', 'RBS', 'VB', 'VBD', 'VBG', 'VBN',
                    'VBP', 'VBZ', 'WRB'}
-LEMMA_MIN = 100
+LEMMA_MIN = 10
 
 
 class Parser(object):
 
-    def __init__(self, path):
+    def __init__(self, path, out_file):
+        self.out_file = out_file
         self.word_att = {}
         self.context_count = {}
+        self.lemma_cnt = None
         self.word_set = self.word_index = self.index_word = None
         print(f"{datetime.now()}:Build Dictionary")
         self.get_word_index_dict(path)
@@ -81,9 +83,8 @@ class Parser(object):
     def create_sparse_matrix(self):
         counts = defaultdict(Counter)
         context_counter = {}
-        print('Total sequences: '+str(len(self.sentences)))
+        print('Total sequences: ' + str(len(self.sentences)))
         for j, s in enumerate(self.sentences):
-            #print(f'{datetime.now()}:Sentence {j}')
             context_lst = self.get_context(s, j)
             for k, word in enumerate(s):
                 for i, context in enumerate(context_lst[k]):
@@ -100,23 +101,36 @@ class Parser(object):
     def get_similarities(self, word_att_pmi, norm):
         result = {}
         for word in WORDS:
+            if word not in self.word_index:
+                continue
             word = self.word_index[word]
             for other in self.word_set:
                 other = self.word_index[other]
                 same_labels = set(word_att_pmi[word]).intersection(word_att_pmi[other])
                 mone = 0
                 for att in same_labels:
-                    mone += word_att_pmi[word][att] * word_att_pmi[other][att]
+                     mone += word_att_pmi[word][att] * word_att_pmi[other][att]
                 result[other] = mone / (norm[word] * norm[other])
             top_pmi = {self.index_word[k]: v for k, v in sorted(word_att_pmi[word].items(),
-                                                            key=lambda item: item[1], reverse=True)[0: 10]}
+                                                                key=lambda item: item[1], reverse=True)[0: 20]}
             top_similarity = {self.index_word[k]: v for k, v in sorted(result.items(),
-                                                                       key=lambda item: item[1], reverse=True)[0: 10]}
-            self.print_top(top_pmi,top_similarity, word)
+                                                                       key=lambda item: item[1], reverse=True)[0: 20]}
+            self.print_top(top_pmi, top_similarity, word)
 
     def print_top(self, pmi, sim, word):
-        print(self.index_word[word] + ": " + str(pmi))
-        print(self.index_word[word] + ": " + str(sim.keys()))
+        print('1-st order similarity')
+        print(self.index_word[word] + ": " + ' '.join(list(pmi.keys())))
+        print('2-nd order similarity')
+        print(self.index_word[word] + ": " + ' '.join(list(sim.keys())))
+        word = self.index_word[word]
+        with open(self.out_file + '_1-nd_similarity.csv', 'a+') as file1:
+            file1.write('similar contexts for:' + word + '\n')
+            for w in pmi.keys():
+                file1.write(w + '\n')
+        with open(self.out_file + '_2-st_similarity.csv', 'a+') as file2:
+            file2.write('similar contexts for:' + word + '\n')
+            for context in sim.keys():
+                file2.write(str(context) + '\n')
 
     def load_txt(self, vocabulary):
         sentences = []
@@ -150,48 +164,66 @@ class ContextParser(Parser):
         context_sen = self.con_sentences[sen_index]
         max_index = max(self.word_index.values())+1
         context_dict = {k: [] for k in context_sen.keys()}
+        i = 0
         for id_loc, values in context_sen.items():
-            word, head_loc, feats = values
-            if head_loc in context_sen:
-                # taking the head
-                word_head, _, feats_head = context_sen[head_loc]
-                token = (word_head, feats, 'up')
-                # check if context exist in dictionary and add to the head and to the token itself
-                if token not in self.word_index:
-                    self.word_index[token] = max_index
+            word, head_loc, feats, prep = values
+            if head_loc == 0:
+                continue
+            if prep:
+                continue
+            h_word, h_head_loc, h_feats, prep = context_sen[head_loc]
+            context = (h_word+'_'+feats+'_up')
+            if context not in self.word_index:
+                self.word_index[context] = max_index
+                max_index += 1
+            context_dict[id_loc].append(self.word_index[context])
+
+            context2 = (word + '_' + feats + '_down')
+            if context2 not in self.word_index:
+                self.word_index[context2] = max_index
+                max_index += 1
+            context_dict[head_loc].append(self.word_index[context2])
+
+            if prep and h_head_loc != 0:
+                hh_word, hh_head_loc, hh_feats, prep = context_sen[h_head_loc]
+                context3 = (word+'_'+h_feats + '_' + h_word+'_down')
+                if context3 not in self.word_index:
+                    self.word_index[context3] = max_index
                     max_index += 1
-                context_dict[id_loc].append(self.word_index[token])
-                token_head = (word, feats, 'down')
-                if token_head not in self.word_index:
-                    self.word_index[token_head] = max_index
+                context_dict[h_head_loc].append(self.word_index[context3])
+                context4 = (hh_word+'_'+h_feats+'_'+h_word+'_up')
+                if context4 not in self.word_index:
+                    self.word_index[context4] = max_index
                     max_index += 1
-                context_dict[head_loc].append(self.word_index[token_head])
+                context_dict[id_loc].append(self.word_index[context4])
         # self.index_word = {v: k for k, v in self.word_index.items()}
         # print({self.index_word[context_sen[k][0]]: [
         #     [self.index_word[self.index_word[i][0]], self.index_word[i][1], self.index_word[i][2]] for i in v] for k, v
         #  in context_dict.items()})
-        return list(context_dict.values())
+        return [v for k, v in context_dict.items() if k in self.con_sen_index[sen_index]]
 
     def load_txt(self, vocabulary):
         self.con_sentences = []
         context_sen = {}
         sentences = []
         sen = []
+        sen_index = []
+        self.con_sen_index = []
         with open(vocabulary, encoding='utf8') as f:
             for line in f:
                 # if we get the end of the sentence add it to all sentences
                 if line == '\n':
                     sentences.append(sen)
                     self.con_sentences.append(context_sen)
+                    self.con_sen_index.append(sen_index)
                     context_sen = {}
+                    sen_index =[]
                     sen = []
                     continue
                 ID, _, lemma, _, CLASS, _, HEAD, FEATS, _, _ = line.split('\t')
+                context_sen[int(ID)] = [lemma, int(HEAD), FEATS, CLASS == 'IN']
                 if CLASS in CONTENT_CLASSES and lemma in self.word_set:
-                    context_sen[int(ID)] = [self.word_index[lemma], int(HEAD), FEATS]
                     sen.append(self.word_index[lemma])
-            return sentences
+                    sen_index.append(int(ID))
 
-    def print_top(self, pmi, sim, word):
-        print(self.index_word[word] + ": " + ' '.join([self.index_word[k[0]]+' '+k[1]+' ' + k[2] for k, v in pmi.items()]))
-        print(self.index_word[word] + ": " + str(sim.keys()))
+            return sentences

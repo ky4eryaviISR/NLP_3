@@ -6,7 +6,7 @@ start = time.time()
 
 words_file = sys.argv[1]
 context_file = sys.argv[2]
-
+out_file = sys.argv[3]
 target_words = ['car', 'bus', 'hospital', 'hotel', 'gun', 'bomb', 'horse', 'fox', 'table', 'bowl', 'guitar',
                 'piano']
 
@@ -83,24 +83,18 @@ if __name__ == '__main__':
 
     for word in target_words:
         print(word)
-        # Target word vector
-        similar_words = k_sim(word)
-        print(similar_words)
-        print()
-        # Find similar contexts (dot product)
-        similar_contexts = k_context(word)
-        print(similar_contexts)
-        print()
-        with open(sys.argv[3] + '_2-nd_similarity.csv', 'a+') as file1:
-            file1.write('"' + word + ': ' + 'similar words ' + sys.argv[3] + '"' + '\n')
-            for sim_word in similar_words:
-                file1.write('"' + sim_word + '"' + '\n')
-            file1.write('\n')
-        with open(sys.argv[3] + '_1-st_similarity.csv', 'a+') as file2:
-            file2.write('"' + word + ': ' + 'similar contexts ' + sys.argv[3] + '"' + '\n')
-            for sim_ctx in similar_contexts:
-                file2.write('"' + str(sim_ctx) + '"' + '\n')
-            file2.write('\n')
+        sim_word = k_sim(word)
+        sim_context = k_context(word)
+        print(sim_word)
+        print(sim_context)
+        with open(out_file + '_2-nd_similarity.csv', 'w') as file1:
+            file1.write('similar contexts for:' + word + '\n')
+            for w in sim_word:
+                file1.write(w + '\n')
+        with open(out_file + '_1-st_similarity.csv', 'w') as file2:
+            file2.write('similar contexts for:' + word + '\n')
+            for context in sim_context:
+                file2.write(str(context) + '\n')
 
 end = time.time() - start
 

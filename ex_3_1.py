@@ -11,12 +11,12 @@ params = {
 
 if __name__ == '__main__':
 
-    var = int(argv[2]) if len(argv) > 2 else 1 # default the first variation
+    var = int(argv[2]) if len(argv) > 2 else 1# default the first variation
     vocabulary = argv[1]
-
-    # vocabulary = 'smallSet.txt'#argv[1]
+    out_file = argv[3]
+    # vocabulary = 'smallSet.txt'
     print(f"{datetime.now()}:Load file with parser {params[var]}")
-    parser = params[var](vocabulary)
+    parser = params[var](vocabulary, out_file)
     print(f"{datetime.now()}:Create sparse matrix")
     parser.create_sparse_matrix()
     print(f"{datetime.now()}:Calculate PMI")
