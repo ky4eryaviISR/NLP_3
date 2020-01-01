@@ -87,13 +87,13 @@ if __name__ == '__main__':
         sim_context = k_context(word)
         print(sim_word)
         print(sim_context)
-        with open(out_file + '_2-nd_similarity.csv', 'w') as file1:
-            file1.write('similar contexts for:' + word + '\n')
+        with open(out_file + '_2-nd_similarity.csv', 'a+') as file1:
+            file1.write('similar word for:' + word + '\n')
             for w in sim_word:
                 file1.write(w + '\n')
             file1.write('\n')
-        with open(out_file + '_1-st_similarity.csv', 'w') as file2:
-            file2.write('similar contexts for:' + word + '\n')
+        with open(out_file + '_1-st_similarity.csv', 'a+') as file2:
+            file2.write('similar context for:' + word + '\n')
             for context in sim_context:
                 file2.write(str(context) + '\n')
             file2.write('\n')
