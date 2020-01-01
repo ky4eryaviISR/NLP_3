@@ -37,8 +37,6 @@ class Parser(object):
         c = []
         for i, s in enumerate(sentences):
             c.append(self.get_context(s, sen_index=i))
-            if i % 100000 == 0:
-                print(f"{datetime.now()}: Pass 100,000 sentences")
         return c
 
     @abstractmethod
@@ -77,8 +75,6 @@ class Parser(object):
         counts = defaultdict(Counter)
         print('Total sequences: ' + str(len(self.sentences)))
         for j, s in enumerate(self.sentences):
-            if j % 100000 == 0:
-                print(f"{datetime.now()}: Passed 100,000")
             context_lst = self.contexts[j]
             for k, word in enumerate(s):
                 if self.lemma_cnt[word] < LEMMA_MIN:
@@ -222,7 +218,7 @@ class ContextParser(Parser):
 
         return [v for k, v in context_dict.items() if k in self.con_sen_index[sen_index]]
 
-    def add_context(self,context):
+    def add_context(self, context):
         self.context_count[context] = 1 if context not in self.context_count \
             else self.context_count[context] + 1
 

@@ -14,6 +14,8 @@ if __name__ == '__main__':
     vocabulary = argv[1]
     # vocabulary = 'smallSet.txt'
     word_sim = {}
+
+
     for i, var in params.items():
         print(f"{datetime.now()}:Load file with parser {var}")
         parser = var(vocabulary)
