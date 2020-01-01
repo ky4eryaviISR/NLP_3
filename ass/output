@@ -1,0 +1,171 @@
+C:\Users\Home-PC\AppData\Local\Programs\Python\Python36\python.exe D:/Vova/MSc/NLP/NLP_3/ex_3_1.py sample.trees.lemmatized/wikipedia.sample.trees.lemmatized
+2020-01-01 19:06:09.165589:Load file with parser <class 'Parser.SentenceParser'>
+2020-01-01 19:06:09.165589:File Parsing
+2020-01-01 19:06:48.847524:Create sparse matrix
+Total sequences: 774858
+2020-01-01 19:07:37.672217:Calculate PMI
+2020-01-01 19:08:21.365544:Calculate Norm
+2020-01-01 19:08:21.489712:Calculate Similarity
+1-st order similarity
+car: car racing driver accident motor crash race drive passenger vehicle engine sport championship front train police model sell production park
+2-nd order similarity
+car: car driver racing drive motor ford vehicle truck crash automobile auto race formula gt nascar toyota cam lap chassis injure
+1-st order similarity
+bus: bus transit terminal route metro transport passenger stop service connect operate rail station airport express london travel line train run
+2-nd order similarity
+bus: bus commuter rail transport transit terminal passenger metro stop service ferry train transportation operate route station freight connect rapid line
+1-st order similarity
+hospital: psychiatric hospital bed medical patient care health doctor facility die private center general st child royal building university locate london
+2-nd order similarity
+hospital: hospital care clinic medical psychiatric nurse patient nursing facility health physician specialized treatment illness rehabilitation dr bed center medicine doctor
+1-st order similarity
+hotel: hotel resort restaurant room chain guest stay purchase grand building operate build street house office locate park open york site
+2-nd order similarity
+hotel: hotel restaurant accommodation room chain inn dining resort purchase guest nightclub stay luxury overnight tourist plaza facility lobby casino bedroom
+1-st order similarity
+gun: anti-aircraft turret gun machine ammunition rifle battery artillery fire mount weapon shot tank shoot heavy arm crew ship capture carry
+2-nd order similarity
+gun: gun cannon ammunition armament turret mortar artillery fire weapon machine battery rifle shot pistol sniper firing bullet tank enemy grenade
+1-st order similarity
+bomb: detonate explode atomic bomb bombing explosion injure bomber raid drop nuclear target aircraft kill damage destroy attack mission car hit
+2-nd order similarity
+bomb: bomb bombing raid injure explosion luftwaffe explode suicide bomber explosive blast kill destroy target drop severely sabotage airfield fighter enemy
+1-st order similarity
+horse: thoroughbred horse rid rider breed racing ride cavalry bombay regiment brigade race light animal australian white royal run age event
+2-nd order similarity
+horse: horse jockey rid racing rider ride bike 5th regiment handicap brigade cavalry artillery race thoroughbred hunt breeder infantry breed battalion
+1-st order similarity
+fox: fox cbs nbc abc affiliate sport news programming 20th channel network broadcast television tv originally studio radio century air episode
+2-nd order similarity
+fox: fox nbc cbs abc affiliate programming network channel espn news broadcast affiliation sitcom tv television broadcasting televise cnn cbc broadcaster
+1-st order similarity
+table: table tennis row column following content medal finish list top round contain water league section place information single player page
+2-nd order similarity
+table: table row column bottom heading following tennis list below redundant third actual summarize volleyball wimbledon second align fixture contain tournament
+1-st order similarity
+bowl: bcs fiesta bowl super batsman wicket rose pro sugar nfl orange ball yard stadium victory florida championship game football conference
+2-nd order similarity
+bowl: bowl steelers nfl super raider over bronco rose cowboy football patriot consecutive inning bat jacksonville pro wicket bowling bowler colt
+1-st order similarity
+guitar: bass guitar acoustic percussion vocal drum keyboard rhythm electric piano string guitarist solo instrument band musician sound play rock album
+2-nd order similarity
+guitar: guitar bass drum acoustic keyboard percussion instrument vocal rhythm backing line-up lineup piano flute guitarist string saxophone tim solo band
+1-st order similarity
+piano: cello sonata op concerto viola violin piano lesson keyboard solo guitar organ orchestra drum instrument bass composition chamber string vocal
+2-nd order similarity
+piano: piano violin cello sonata op viola flute concerto instrument guitar string keyboard percussion bass vocal acoustic drum trio quartet solo
+2020-01-01 19:08:22.063184:Finish
+2020-01-01 19:08:22.063184:Load file with parser <class 'Parser.WindowParser'>
+2020-01-01 19:08:22.063184:File Parsing
+2020-01-01 19:08:56.345251:Create sparse matrix
+Total sequences: 774858
+2020-01-01 19:09:13.183535:Calculate PMI
+2020-01-01 19:09:28.878362:Calculate Norm
+2020-01-01 19:09:29.022013:Calculate Similarity
+1-st order similarity
+car: touring accident crash driver racing race passenger motor bomb stock drive sport car buy park championship hit train sell police
+2-nd order similarity
+car: car driver racing formula automobile stock injure auto race truck motorcycle vehicle motor drunk nascar toyota ford buy lap kill
+1-st order similarity
+bus: interchange transit terminal route operator stop service bus rail operate connect station transport passenger london travel express regular line stand
+2-nd order similarity
+bus: bus commuter train freight rail passenger transport terminal ferry tram transit line operate operator route metro taxi hub connect railway
+1-st order similarity
+hospital: psychiatric bed teaching hospital rush memorial medical patient doctor care general st royal private child die london health ship locate
+2-nd order similarity
+hospital: hospital clinic care patient medical nurse ward physician surgeon sick profession elderly dental psychiatric nursing specialist doctor residence college nh
+1-st order similarity
+hotel: hilton casino luxury hotel plaza restaurant resort room chain stay grand convert guest bar purchase owner historic management store operate
+2-nd order similarity
+hotel: hotel restaurant resort plaza apartment cafe inn bar casino luxury nightclub supermarket chain pub retail store shop brand dining mall
+1-st order similarity
+gun: anti-aircraft anti-tank machine turret ammunition barrel gun battery rifle deck rose artillery n fire mount shot heavy tank enemy crew
+2-nd order similarity
+gun: gun artillery cannon mortar pistol fire tank arm turret rifle weapon machine ammunition battery barrel bullet enemy heavy shot armament
+1-st order similarity
+bomb: detonate explode atomic disposal hydrogen explosion explosive raid sink pipe drop suicide bomb nuclear damage plane target destroy attack car
+2-nd order similarity
+bomb: bomb explosion explosive enemy bombing luftwaffe torpedo destroy shell weapon submarine explode accidentally blast target crash massive terrorist disposal attack
+1-st order similarity
+horse: thoroughbred rid riding racing cattle ride rider breed stable artillery race brigade wild regiment dark guard horse light dead comic
+2-nd order similarity
+horse: horse race racing motorcycle jockey breed regiment thoroughbred bicycle cyclist cavalry brigade bike artillery rider rid battalion infantry endurance goat
+1-st order similarity
+fox: hound fox 20th news affiliate sport net nbc abc channel network programming kid morning soccer corporation century tv radio charles
+2-nd order similarity
+fox: fox nbc cbs programming abc network news broadcast cbc espn broadcasting pb cnn channel tv affiliate show radio affiliation programme
+1-st order similarity
+table: picnic periodic tennis table column content bottom chair medal round list top water data mountain finish league show championship turn
+2-nd order similarity
+table: table bottom row skiing tournament wimbledon pool following tennis top volleyball comparison column amateur summarize pavilion player content second finish
+1-st order similarity
+bowl: right-arm fiesta right-handed super batsman gator quiz pro alley rose bowl sugar cotton orange wicket inning consecutive ball victory ring
+2-nd order similarity
+bowl: bowl bowler batsman occasional wicket pace super bat consecutive league over inning pro quiz bowling cricketer ring inaugural win playoff
+1-st order similarity
+guitar: acoustic bass banjo riff harmonica vocal rhythm electric keyboard percussion backing gibson drum solo violin piano guitar playing hero tune
+2-nd order similarity
+guitar: guitar acoustic bass instrument drum vocal percussion keyboard cello piano saxophone string rhythm trio violin solo guitarist trumpet backing ensemble
+1-st order similarity
+piano: sonata concerto viola op cello accompaniment violin clarinet lesson solo organ orchestra guitar piano arrangement bass string chamber voice vocal
+2-nd order similarity
+piano: piano violin cello op viola concerto sonata flute string bass trumpet orchestra guitar quartet lesson horn instrument instrumental acoustic ensemble
+2020-01-01 19:09:29.659373:Finish
+2020-01-01 19:09:29.659373:Load file with parser <class 'Parser.ContextParser'>
+2020-01-01 19:09:29.659373:File Parsing
+2020-01-01 19:10:16.697983:Create sparse matrix
+Total sequences: 774858
+2020-01-01 19:10:27.943957:Calculate PMI
+2020-01-01 19:10:33.806386:Calculate Norm
+2020-01-01 19:10:33.961540:Calculate Similarity
+1-st order similarity
+car: accident_compmod_up concept_compmod_down race_dobj_up car_conj_down crash_compmod_up bomb_compmod_up car_conj_up hit_adpmod_by_up race_amod_down drive_dobj_up drive_partmod_down cable_compmod_down formula_compmod_down racing_compmod_up race_compmod_down passenger_compmod_down driver_compmod_up steal_dobj_up stock_compmod_down motor_compmod_down
+2-nd order similarity
+car: car truck vehicle motorcycle driver van motor auto racing bike automobile horse traffic carriage stock bicycle thoroughbred boat three race
+1-st order similarity
+bus: stop_compmod_up interchange_compmod_up route_compmod_up terminal_compmod_up stand_compmod_up transit_compmod_up depot_compmod_up operator_compmod_up service_compmod_up travel_partmod_down tour_compmod_down express_compmod_down driver_compmod_up train_conj_down crash_compmod_up connect_nsubj_up get_adpmod_on_up trip_compmod_up serve_adpmod_by_up lane_compmod_up
+2-nd order similarity
+bus: bus train tram commuter rail ferry taxi passenger transit truck freight subway shuttle metro shipping cable business railroad phone jersey
+1-st order similarity
+hospital: hospital_conj_up hospital_conj_down bed_compmod_up teaching_compmod_down memorial_compmod_down take_adpmod_to_up admit_adpmod_to_up die_adpmod_at_up visit_adpmod_in_up massachusetts_compmod_down general_compmod_down child_poss_down spend_adpmod_in_up regional_compmod_down work_adpmod_at_up die_adpmod_in_up staff_compmod_up trust_compmod_up university_compmod_down nearby_amod_down
+2-nd order similarity
+hospital: hospital clinic library kindergarten jail prison headquarters residence convent school priory college factory campus zoo council paris farm camp park
+1-st order similarity
+hotel: hotel_conj_down luxury_compmod_down restaurant_conj_down hotel_conj_up stay_adpmod_at_up palace_compmod_down room_compmod_up convert_adpmod_into_up chain_compmod_up chain_adpmod_of_up purchase_dobj_up house_compmod_down hold_adpmod_at_up building_conj_up management_conj_down spring_compmod_down park_compmod_down stay_adpmod_in_up star_compmod_down historic_amod_down
+2-nd order similarity
+hotel: hotel casino restaurant inn mosque resort store castle cabin supermarket factory synagogue stadium shop palace dormitory estate cafe mall structure
+1-st order similarity
+gun: machine_compmod_down arm_adpmod_with_up gun_conj_up weapon_conj_down fire_nsubj_up n_compmod_up lewis_compmod_down mount_dobj_up fire_dobj_up shield_compmod_up tank_compmod_down artillery_compmod_down fire_compmod_up point_dobj_up battery_compmod_up light_amod_down pull_dobj_up crew_compmod_up fit_adpmod_with_up heavy_amod_down
+2-nd order similarity
+gun: gun weapon pistol mortar cannon knife rifle artillery bomber sword spear rocket ammunition missile tank tube firing bullet engine shell
+1-st order similarity
+bomb: explode_nsubj_up atomic_amod_down hydrogen_compmod_down sink_conj_down hit_adpmod_by_up drop_dobj_up pipe_compmod_down damage_adpmod_by_up destroy_adpmod_by_up attack_compmod_up raid_amod_up explosive_amod_down drop_nsubjpass_up attach_partmod_down raid_compmod_up target_dobj_down car_compmod_down damage_conj_down ship_nsubjpass_down nuclear_amod_down
+2-nd order similarity
+bomb: bomb torpedo bombing explosion earthquake shell bullet missile tornado bombardment bomber fire air device eruption fascist charge sink tactical gas
+1-st order similarity
+horse: rid_dobj_up racing_compmod_up riding_compmod_up artillery_compmod_up mount_adpmod_on_up rider_compmod_up brigade_compmod_up race_compmod_up dead_amod_down wild_amod_down comic_compmod_up win_infmod_down light_compmod_down steal_dobj_up race_compmod_down guard_compmod_up team_adpmod_of_up champion_compmod_down train_dobj_up regiment_compmod_up
+2-nd order similarity
+horse: horse motorcycle bull bike thoroughbred car bicycle infantry motor dog cat elephant person volunteer auto man helmet cavalry colt driver
+1-st order similarity
+fox: net_compmod_up news_compmod_up affiliate_compmod_up sport_compmod_up century_compmod_down programming_compmod_up kid_compmod_up reservation_compmod_up channel_compmod_up 20th_amod_down matthew_compmod_down switch_adpmod_to_up air_adpmod_on_up break_compmod_up network_compmod_up radio_compmod_up warren_compmod_down spirit_amod_up tv_compmod_up picture_compmod_up
+2-nd order similarity
+fox: fox abc cbc nbc cbs cable itv bbc satellite paramount tv pb television espn radio sky disney shaw sony mtv
+1-st order similarity
+table: content_adpmod_of_down medal_compmod_down periodic_amod_down table_adpmod_of_up table_adpmod_of_down round_compmod_down database_compmod_down knight_adpmod_of_up top_dobj_up list_conj_up top_adpmod_of_up operating_compmod_down list_nsubj_up show_adpmod_in_up following_amod_down follow_amod_down water_compmod_down half_adpmod_of_up list_adpmod_in_up turn_dobj_up
+2-nd order similarity
+table: table column season content tower system category list watchlist diagram infobox bracket poll page ranking register map count image userpage
+1-st order similarity
+bowl: rose_compmod_down pro_compmod_down sugar_compmod_down super_compmod_down subdivision_compmod_up orange_compmod_down cotton_compmod_down inning_adpmod_in_down game_appos_down independence_compmod_down selection_compmod_up holiday_compmod_down victory_adpmod_in_up ring_compmod_up classic_compmod_up copper_compmod_down appearance_compmod_up victory_compmod_up ball_dobj_down ball_amod_up
+2-nd order similarity
+bowl: bowl super wrestling playoff all-ireland league ncaa wwe soccer all-star golf parade junior juice afl cup boxing softball baseball olympic
+1-st order similarity
+guitar: vocal_conj_down vocal_conj_up bass_conj_down bass_compmod_down acoustic_amod_down solo_compmod_up guitar_conj_down electric_amod_down lead_compmod_down guitar_conj_up piano_conj_down replace_adpmod_on_up playing_compmod_up hero_compmod_up signature_compmod_down drum_conj_up feature_adpmod_on_up play_dobj_up join_adpmod_on_up pick_compmod_up
+2-nd order similarity
+guitar: guitar bass drum piano keyboard flute cello saxophone violin vocal viola instrument trumpet percussion horn guitarist organ intro solo repertoire
+1-st order similarity
+piano: voice_conj_up solo_compmod_up orchestra_conj_down toy_compmod_down guitar_conj_up guitar_conj_down grand_amod_down bass_conj_down trio_compmod_up vocal_conj_down teacher_compmod_up arrangement_compmod_up drum_conj_up roll_compmod_up study_dobj_up solo_compmod_down acoustic_amod_down competition_compmod_up no_compmod_up score_compmod_up
+2-nd order similarity
+piano: piano guitar violin bass drum keyboard cello flute percussion saxophone instrument viola vocal trumpet organ horn mathematics composition concerto solo
+2020-01-01 19:10:34.617757:Finish
+
+Process finished with exit code 0
