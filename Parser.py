@@ -258,7 +258,6 @@ class ContextParser(Parser):
                     lemma_count[lemma] = 1 if lemma not in lemma_count \
                         else lemma_count[lemma] + 1
             self.lemma_cnt = lemma_count
-            print(f"{datetime.now()}: Start creating contexes")
             return sentences
 
 
